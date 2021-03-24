@@ -34,7 +34,8 @@ Core/Src/stm32l4xx_hal_msp.o: ../Core/Src/stm32l4xx_hal_msp.c \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_tim_ex.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h \
- ../Core/Inc/Flash.hpp ../Core/Inc/Recorder.hpp
+ ../Core/Inc/Flash.hpp ../Core/Inc/Recorder.hpp \
+ ../Core/Inc/ESP8266interface.hpp
 
 ../Core/Inc/main.hpp:
 
@@ -111,3 +112,5 @@ Core/Src/stm32l4xx_hal_msp.o: ../Core/Src/stm32l4xx_hal_msp.c \
 ../Core/Inc/Flash.hpp:
 
 ../Core/Inc/Recorder.hpp:
+
+../Core/Inc/ESP8266interface.hpp:

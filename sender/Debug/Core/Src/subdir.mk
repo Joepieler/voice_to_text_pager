@@ -11,6 +11,7 @@ C_SRCS += \
 ../Core/Src/system_stm32l4xx.c 
 
 CPP_SRCS += \
+../Core/Src/ESP8266Interface.cpp \
 ../Core/Src/Flash.cpp \
 ../Core/Src/Recorder.cpp \
 ../Core/Src/main.cpp 
@@ -23,6 +24,7 @@ C_DEPS += \
 ./Core/Src/system_stm32l4xx.d 
 
 OBJS += \
+./Core/Src/ESP8266Interface.o \
 ./Core/Src/Flash.o \
 ./Core/Src/Recorder.o \
 ./Core/Src/main.o \
@@ -33,12 +35,15 @@ OBJS += \
 ./Core/Src/system_stm32l4xx.o 
 
 CPP_DEPS += \
+./Core/Src/ESP8266Interface.d \
 ./Core/Src/Flash.d \
 ./Core/Src/Recorder.d \
 ./Core/Src/main.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
+Core/Src/ESP8266Interface.o: ../Core/Src/ESP8266Interface.cpp
+	arm-none-eabi-g++ "$<" -mcpu=cortex-m4 -std=gnu++14 -g3 -DUSE_HAL_DRIVER -DSTM32L476xx -DDEBUG -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage -MMD -MP -MF"Core/Src/ESP8266Interface.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/Flash.o: ../Core/Src/Flash.cpp
 	arm-none-eabi-g++ "$<" -mcpu=cortex-m4 -std=gnu++14 -g3 -DUSE_HAL_DRIVER -DSTM32L476xx -DDEBUG -c -I../Core/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc -I../Drivers/STM32L4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32L4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-use-cxa-atexit -Wall -fstack-usage -MMD -MP -MF"Core/Src/Flash.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 Core/Src/Recorder.o: ../Core/Src/Recorder.cpp

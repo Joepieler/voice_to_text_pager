@@ -52,6 +52,8 @@ UART_HandleTypeDef huart2;
 
 TIM_HandleTypeDef htim16;
 
+UART_HandleTypeDef huart1;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -59,6 +61,7 @@ TIM_HandleTypeDef htim16;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_DAC1_Init(void);
@@ -101,6 +104,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   MX_DAC1_Init();
@@ -109,26 +113,20 @@ int main(void)
 
 
   //start timer
-  HAL_TIM_Base_Start(&htim16);
-  Recorder r(&htim16, &hadc1 ,&hdac1);
-  r.main();
+  //HAL_TIM_Base_Start(&htim16);
+  //Recorder r(&htim16, &hadc1 ,&hdac1);
+  //r.main();
 
-  // Get current time
-
-//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-//  HAL_Delay(1000);
-//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-//
-//  for(uint32_t i = 0; i < SAMPLE_RATE * MAX_RECORD_TIME; i++){
-//	  HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_8B_R, data[i]);
-//  	  while(counter < 500){
-//  		  counter++;
-//  	  }
-//  	  counter = 0;
-//    }
-//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-  //delete[] data;
   /* USER CODE END 2 */
+
+  ESP8266Interface i(&huart1);
+  i.Reset();
+  HAL_Delay(1000);
+  i.StartUp(1);
+  HAL_Delay(1000);
+  i.Connect("Joepie", "Joepie123");
+  HAL_Delay(10000);
+  i.Disconnect();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -305,6 +303,41 @@ static void MX_DAC1_Init(void)
   /* USER CODE BEGIN DAC1_Init 2 */
 
   /* USER CODE END DAC1_Init 2 */
+
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 
