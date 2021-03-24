@@ -18,6 +18,7 @@ extern "C" {
 class ESP8266Interface {
 private:
 	UART_HandleTypeDef *ESP8266_;
+	bool IsOK();
 public:
 	ESP8266Interface(UART_HandleTypeDef *ESP8266);
 	virtual ~ESP8266Interface();
@@ -26,14 +27,12 @@ public:
 	bool DHCP(bool enable, int mode);
 	bool Connect(const char *wifiname, const char *password);
 	bool Disconnect();
+	bool ConnectSocket(const char *type, const char *ipaddress, uint16_t poort);
 	int8_t GetRSSI();
 	bool IsConnected();
 	int8_t scan();
 	bool Send(int id, const void *datat, uint32_t amount);
 	int32_t Receive(int id, void *data, uint32_t amount);
-
-	bool IsOK();
-
 
 };
 

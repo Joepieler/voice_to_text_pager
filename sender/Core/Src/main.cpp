@@ -124,7 +124,11 @@ int main(void)
   HAL_Delay(1000);
   i.StartUp(1);
   HAL_Delay(1000);
-  i.Connect("Joepie", "Joepie123");
+  i.Connect("ssid", "pw");
+  HAL_Delay(10000);
+  i.ConnectSocket("UDP", "192.168.178.119", 5005);
+  HAL_Delay(10000);
+  i.Send(0, "dikke boktor", 12);
   HAL_Delay(10000);
   i.Disconnect();
 
