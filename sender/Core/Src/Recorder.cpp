@@ -7,7 +7,8 @@
 
 #include <Recorder.hpp>
 
-#define MESSAGESIZE 64
+#define MESSAGESIZE 96
+#define TIMER_INTERVAL 160000 / SAMPLE_RATE
 
 Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, DAC_HandleTypeDef *speaker, ESP8266Interface *ESP){
 	// TODO Auto-generated constructor stub
@@ -27,15 +28,17 @@ void Recorder::main(){
 	Counter_ = 0;
 	while(true){
 		//record if user button is pressed
-		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) != GPIO_PIN_SET){
+		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) != GPIO_PIN_SET && Counter_ < SAMPLE_RATE * MAX_RECORD_TIME){
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 			//Record on timer rate 16KHz
-			if (__HAL_TIM_GET_COUNTER(Timer_) - timer_val >= 10 && Counter_ < SAMPLE_RATE * MAX_RECORD_TIME){
+			if (__HAL_TIM_GET_COUNTER(Timer_) - timer_val >= TIMER_INTERVAL){
 				HAL_ADC_Start(Mic_);
 				Buffer_[Counter_] = HAL_ADC_GetValue(Mic_);
 				Counter_++;
 				timer_val = __HAL_TIM_GET_COUNTER(Timer_);
 			}
 		} else if(Counter_ > 0) {
+			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 	 		uint64_t i = 0;
 	 		ESP_->Send(0, "start", 5);
 			while(i < Counter_){

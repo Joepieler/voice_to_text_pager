@@ -9,7 +9,7 @@
 
 int ESP8266Interface::IsOK(uint8_t length){
 	char response[10+length];
-	HAL_UART_Receive(ESP8266_, (uint8_t *)response, sizeof(response), 2);
+	HAL_UART_Receive(ESP8266_, (uint8_t *)response, sizeof(response), 1);
 	if(strstr(response, "OK") != NULL){
 		return 0;
 	}
