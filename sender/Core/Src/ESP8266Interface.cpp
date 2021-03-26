@@ -7,14 +7,13 @@
 
 #include "ESP8266Interface.hpp"
 
-bool ESP8266Interface::IsOK(){
-	char ok[] = "OK";
-	char response[20];
-	HAL_UART_Receive(ESP8266_, (uint8_t *)response, sizeof(response), 1000);
-	if(strstr(response, ok) != NULL){
-		return 1;
+int ESP8266Interface::IsOK(uint8_t length){
+	char response[10+length];
+	HAL_UART_Receive(ESP8266_, (uint8_t *)response, sizeof(response), 2);
+	if(strstr(response, "OK") != NULL){
+		return 0;
 	}
-	return 0;
+	return -1;
 }
 
 
@@ -28,53 +27,64 @@ ESP8266Interface::~ESP8266Interface() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ESP8266Interface::StartUp(int mode){
-	char command[] = "AT+CWMODE=%d\r\n";
-	char c[sizeof(command)];
-	sprintf(c, command, mode);
-	HAL_UART_Transmit(ESP8266_,  (uint8_t *)c, sizeof(c), HAL_MAX_DELAY);
-	return IsOK();
+int ESP8266Interface::StartUp(int mode){
+	const char command[] = "AT+CWMODE=%d\r\n";
+	sprintf(buffer_, command, mode);
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, sizeof(command) -2, HAL_MAX_DELAY);
+	return IsOK(sizeof(command));
 }
 
 
-bool ESP8266Interface::Reset(){
-	char c[] = "AT+RST\r\n";
-	HAL_UART_Transmit(ESP8266_,  (uint8_t *)c, sizeof(c), HAL_MAX_DELAY);
-	return IsOK();
+int ESP8266Interface::Reset(){
+	const char command[] = "AT+RST\r\n";
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
+	if(IsOK(sizeof(command)) == 0){
+		HAL_Delay(250);
+		return 0;
+	}
+	return -1;
 }
 
 
-bool ESP8266Interface::DHCP(bool enable, int mode){
+int ESP8266Interface::DHCP(bool enable, int mode){
 	return 0;
 }
 
 
-bool ESP8266Interface::Connect(const char *wifiname, const char *password){
+int ESP8266Interface::Connect(const char *wifiname, const char *password){
 	char command[] = "AT+CWJAP=\"%s\",\"%s\"\r\n";
-	char c[sizeof(wifiname) + sizeof(password) + sizeof(command) + 3];
-	sprintf(c, command, wifiname, password);
-	HAL_UART_Transmit(ESP8266_,  (uint8_t *)c, sizeof(c), HAL_MAX_DELAY);
-	return IsOK();
+	uint8_t size = sizeof(command) + sizeof(wifiname) + sizeof(password) + 3;
+	sprintf(buffer_, command, wifiname, password);
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, size, HAL_MAX_DELAY);
+
+	//check if received
+	HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, size, 1000);
+	if(strstr(buffer_, "\r\n") == NULL) return -1;
+
+	HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, size, 10000);
+	if(strstr(buffer_, "CONNECTED") == NULL) return -1;
+	return 0;
 }
 
 
-bool ESP8266Interface::Disconnect(){
+int ESP8266Interface::Disconnect(){
 	char command[] = "AT+CWQAP\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
-	return IsOK();
+	return IsOK(sizeof(command));
 }
 
 
-bool ESP8266Interface::ConnectSocket(const char *type, const char *ipaddress, uint16_t poort){
+int ESP8266Interface::ConnectSocket(const char *type, const char *ipaddress, uint16_t poort){
 	char mode[] = "AT+CIPMUX=0\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)mode, sizeof(mode), HAL_MAX_DELAY);
-	HAL_Delay(1000);
+	IsOK(sizeof(mode));
 
 	char command[] = "AT+CIPSTART=\"%s\",\"%s\",%d\r\n";
 	char c[sizeof(command) + sizeof(type) + sizeof(ipaddress) + 8];
 	sprintf(c, command, type, ipaddress, poort);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)c, sizeof(c), HAL_MAX_DELAY);
-	return IsOK();
+	HAL_Delay(10);
+	return IsOK(sizeof(c));
 }
 
 
@@ -83,7 +93,7 @@ int8_t ESP8266Interface::GetRSSI(){
 }
 
 
-bool ESP8266Interface::IsConnected(){
+int ESP8266Interface::IsConnected(){
 	return 0;
 }
 
@@ -93,14 +103,14 @@ int8_t ESP8266Interface::scan(){
 }
 
 
-bool ESP8266Interface::Send(int id, const void *data, uint32_t amount){
+int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
 	char command[] = "AT+CIPSEND=%d\r\n";
 	char c[sizeof(command)];
 	sprintf(c, command, amount);
-	HAL_UART_Transmit(ESP8266_,  (uint8_t *)c, sizeof(c), HAL_MAX_DELAY);
-	HAL_Delay(100);
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)c, sizeof(c)-1, HAL_MAX_DELAY);
+	IsOK(sizeof(c)-1);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)data, amount, HAL_MAX_DELAY);
-	return IsOK();
+	return IsOK(0);
 }
 
 

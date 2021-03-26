@@ -8,6 +8,8 @@
 #ifndef ESP8266INTERFACE_HPP_
 #define ESP8266INTERFACE_HPP_
 
+#define BUFFERSIZE 100
+
 #ifdef __cplusplus
 extern "C" {
 
@@ -17,21 +19,22 @@ extern "C" {
 
 class ESP8266Interface {
 private:
+	char buffer_[BUFFERSIZE];
 	UART_HandleTypeDef *ESP8266_;
-	bool IsOK();
+	int IsOK(uint8_t length);
 public:
 	ESP8266Interface(UART_HandleTypeDef *ESP8266);
 	virtual ~ESP8266Interface();
-	bool StartUp(int mode);
-	bool Reset();
-	bool DHCP(bool enable, int mode);
-	bool Connect(const char *wifiname, const char *password);
-	bool Disconnect();
-	bool ConnectSocket(const char *type, const char *ipaddress, uint16_t poort);
+	int StartUp(int mode);
+	int Reset();
+	int DHCP(bool enable, int mode);
+	int Connect(const char *wifiname, const char *password);
+	int Disconnect();
+	int ConnectSocket(const char *type, const char *ipaddress, uint16_t poort);
 	int8_t GetRSSI();
-	bool IsConnected();
+	int IsConnected();
 	int8_t scan();
-	bool Send(int id, const void *datat, uint32_t amount);
+	int Send(int id, const void *datat, uint32_t amount);
 	int32_t Receive(int id, void *data, uint32_t amount);
 
 };

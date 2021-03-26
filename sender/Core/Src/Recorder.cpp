@@ -7,11 +7,14 @@
 
 #include <Recorder.hpp>
 
-Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, DAC_HandleTypeDef *speaker){
+#define MESSAGESIZE 64
+
+Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, DAC_HandleTypeDef *speaker, ESP8266Interface *ESP){
 	// TODO Auto-generated constructor stub
 	Timer_ = timer;
 	Mic_ = mic;
 	Speaker_ = speaker;
+	ESP_ = ESP;
 }
 
 Recorder::~Recorder() {
@@ -21,6 +24,7 @@ Recorder::~Recorder() {
 void Recorder::main(){
 	uint32_t timer_val = __HAL_TIM_GET_COUNTER(Timer_);
 	Buffer_ = new uint8_t[SAMPLE_RATE * MAX_RECORD_TIME];
+	Counter_ = 0;
 	while(true){
 		//record if user button is pressed
 		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) != GPIO_PIN_SET){
@@ -33,12 +37,18 @@ void Recorder::main(){
 			}
 		} else if(Counter_ > 0) {
 	 		uint64_t i = 0;
+	 		ESP_->Send(0, "start", 5);
 			while(i < Counter_){
-				if (__HAL_TIM_GET_COUNTER(Timer_) - timer_val >= 10 ){
-					HAL_DAC_SetValue(Speaker_, DAC_CHANNEL_1, DAC_ALIGN_8B_R, Buffer_[i]);
-					HAL_DAC_Start(Speaker_, DAC_CHANNEL_1);
-					i++;
-					timer_val = __HAL_TIM_GET_COUNTER(Timer_);
+				if(Counter_ - i >= MESSAGESIZE){
+					uint8_t b[MESSAGESIZE];
+					memcpy(b, Buffer_ + i, MESSAGESIZE*sizeof(uint8_t));
+					ESP_->Send(0, b, MESSAGESIZE);
+					i +=MESSAGESIZE;
+				}
+				else
+				{
+					Counter_ = 0;
+					ESP_->Send(0, "end", 3);
 				}
 			}
 			Counter_ = 0;

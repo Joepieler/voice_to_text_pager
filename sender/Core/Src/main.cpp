@@ -113,24 +113,20 @@ int main(void)
 
 
   //start timer
-  //HAL_TIM_Base_Start(&htim16);
-  //Recorder r(&htim16, &hadc1 ,&hdac1);
-  //r.main();
-
+  HAL_TIM_Base_Start(&htim16);
   /* USER CODE END 2 */
 
   ESP8266Interface i(&huart1);
   i.Reset();
-  HAL_Delay(1000);
   i.StartUp(1);
-  HAL_Delay(1000);
-  i.Connect("ssid", "pw");
-  HAL_Delay(10000);
+  i.Connect("-", "-");
   i.ConnectSocket("UDP", "192.168.178.119", 5005);
-  HAL_Delay(10000);
-  i.Send(0, "dikke boktor", 12);
-  HAL_Delay(10000);
-  i.Disconnect();
+
+
+
+  Recorder r(&htim16, &hadc1 ,&hdac1, &i);
+  r.main();
+
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
