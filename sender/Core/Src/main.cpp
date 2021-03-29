@@ -119,8 +119,8 @@ int main(void)
   ESP8266Interface i(&huart1);
   i.Reset();
   i.StartUp(1);
-  i.Connect("-", "-");
-  i.ConnectSocket("UDP", "192.168.178.119", 5005);
+  i.Connect(SSID, PASSWORD);
+  i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
 
 
 
