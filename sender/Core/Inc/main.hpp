@@ -36,6 +36,7 @@ extern "C" {
 #include <Recorder.hpp>
 #include <ESP8266interface.hpp>
 #include <Settings.h>
+#include <RingBuffer.hpp>
 
 /* USER CODE END Includes */
 

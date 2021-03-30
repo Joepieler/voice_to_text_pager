@@ -31,7 +31,6 @@ public:
 	void main();
 };
 
-
 }
 #endif
 #endif /* RECORDER_H_ */

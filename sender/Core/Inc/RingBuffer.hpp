@@ -11,7 +11,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
 
 #define BUFFER_SIZE 10000
 
@@ -24,13 +23,14 @@ private:
 public:
 	RingBuffer();
 	virtual ~RingBuffer();
+	bool IsEmpty();
 	bool Push(uint8_t data);
 	uint8_t Pop();
-	bool pop(uint8_t * data, uint32_t size);
+	bool Pop(uint8_t * data, uint32_t size);
 	uint32_t GetSize();
 };
 
-#ifdef __cplusplus
+
 }  // end extern "C"
 #endif
 

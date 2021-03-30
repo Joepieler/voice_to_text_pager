@@ -40,6 +40,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+RingBuffer Buffer;
+
 
 /* USER CODE END PM */
 
@@ -112,30 +114,32 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 
-  //start timer
-  HAL_TIM_Base_Start(&htim16);
   /* USER CODE END 2 */
 
-  ESP8266Interface i(&huart1);
-  i.Reset();
-  i.StartUp(1);
-  i.Connect(SSID, PASSWORD);
-  i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
+  ESP8266Interface ESP(&huart1);
+  ESP.Reset();
+  ESP.StartUp(1);
+  ESP.Connect(SSID, PASSWORD);
+  ESP.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
 
+  uint8_t b[MESSAGESIZE];
 
-
-  Recorder r(&htim16, &hadc1 ,&hdac1, &i);
-  r.main();
-
+  bool Timer_status = false;
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
-    /* USER CODE BEGIN 3 */
-
-  /* USER CODE END 3 */
+	if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) == GPIO_PIN_SET && Timer_status == false){
+		ESP.Send(0, "start", 5);
+		HAL_TIM_Base_Start_IT(&htim16);
+		Timer_status = true;
+	} else if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) == GPIO_PIN_RESET && Timer_status == true){
+		ESP.Send(0, "END", 5);
+		HAL_TIM_Base_Start_IT(&htim16);
+		Timer_status = false;
+	}
+	if (Buffer.Pop(b, MESSAGESIZE) == 0) ESP.Send(0, b, MESSAGESIZE);
   }
 }
 
@@ -425,9 +429,9 @@ static void MX_TIM16_Init(void)
 
   /* USER CODE END TIM16_Init 1 */
   htim16.Instance = TIM16;
-  htim16.Init.Prescaler = 500 -1;
+  htim16.Init.Prescaler = 50 -1;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 65535;
+  htim16.Init.Period = 100 -1;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -441,7 +445,6 @@ static void MX_TIM16_Init(void)
 
 }
 
-/* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
 
