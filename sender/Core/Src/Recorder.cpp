@@ -25,6 +25,7 @@ void Recorder::main(){
 	uint32_t timer_val = __HAL_TIM_GET_COUNTER(Timer_);
 	//Buffer_ = new uint8_t[SAMPLE_RATE * MAX_RECORD_TIME];
 	uint8_t byts_counter = 0;
+	uint8_t tmp = 0;
 	uint64_t buffer = 0;
 	Counter_ = 0;
 	while(true){
@@ -34,11 +35,12 @@ void Recorder::main(){
 			//Record on timer rate 16KHz
 			if (__HAL_TIM_GET_COUNTER(Timer_) - timer_val >= TIMER_INTERVAL){
 				HAL_ADC_Start(Mic_);
+				tmp = HAL_ADC_GetValue(Mic_);
 				buffer = buffer << 8;
-				buffer = buffer | HAL_ADC_GetValue(Mic_);
+				buffer = buffer | tmp;
 				byts_counter++;
 				if(byts_counter  == 8){
-					Flash_.WriteFlash64b(0x12ABCDEF);//buffer);
+					Flash_.WriteFlash64b(buffer);
 					byts_counter = 0;
 				}
 				Counter_++;
@@ -52,13 +54,19 @@ void Recorder::main(){
 			while(i < Counter_){
 				if(Counter_ - i >= MESSAGESIZE){
 					uint8_t b[MESSAGESIZE];
-					uint32_t buffer2 =0;
-					for(uint8_t x = 0; x < MESSAGESIZE / 4; x+=4){
-						Flash_.ReadFlash64b(0x08080000 + x, buffer2);
-						b[x] = buffer2;
-						b[x + 1] = buffer2 >> 8;
-						b[x + 2] = buffer2 >> 16;
-						b[x + 3] = buffer2 >> 24;
+					uint32_t buffer2_A = 0;
+					uint32_t buffer2_B = 0;
+					for(uint8_t x = 0; x < MESSAGESIZE; x+=8){
+						Flash_.ReadFlash64b(0x08080000 + x + i, buffer2_B);
+						Flash_.ReadFlash64b(0x08080000 + x + 4 + i, buffer2_A);
+						b[x] =     buffer2_A >> 24;
+						b[x + 1] = buffer2_A >> 16;
+						b[x + 2] = buffer2_A >> 8;
+						b[x + 3] = buffer2_A;
+						b[x + 4] = buffer2_B >> 24;
+						b[x + 5] = buffer2_B >> 16;
+						b[x + 6] = buffer2_B >> 8;
+						b[x + 7] = buffer2_B;
 					}
 					ESP_->Send(0, b, MESSAGESIZE);
 					i +=MESSAGESIZE;
