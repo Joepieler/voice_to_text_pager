@@ -124,7 +124,7 @@ int main(void)
 
 
 
-  Recorder r(&htim16, &hadc1 ,&hdac1, &i);
+  Recorder r(&htim16, &hadc1, &i);
   r.main();
 
 
