@@ -34,6 +34,7 @@ void Recorder::main(){
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 			//Record on timer rate 16KHz
 			if (__HAL_TIM_GET_COUNTER(Timer_) - timer_val >= TIMER_INTERVAL){
+				timer_val = __HAL_TIM_GET_COUNTER(Timer_);
 				HAL_ADC_Start(Mic_);
 				tmp = HAL_ADC_GetValue(Mic_);
 				buffer = buffer << 8;
@@ -44,7 +45,7 @@ void Recorder::main(){
 					byts_counter = 0;
 				}
 				Counter_++;
-				timer_val = __HAL_TIM_GET_COUNTER(Timer_);
+				//timer_val = __HAL_TIM_GET_COUNTER(Timer_);
 			}
 		} else if(Counter_ > 0) {
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
