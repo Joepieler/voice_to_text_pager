@@ -1,5 +1,17 @@
 import socket
 import wave
+import azure.cognitiveservices.speech as speechsdk
+
+
+def from_file():
+    speech_config = speechsdk.SpeechConfig(subscription="-", region="-", )
+    audio_input = speechsdk.AudioConfig(filename="sound.wav")
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input, language="nl-NL")
+    
+    result = speech_recognizer.recognize_once_async().get()
+    print(result.text)
+
+
 
 UDP_IP = "192.168.178.119"
 UDP_PORT = 5005
@@ -25,6 +37,8 @@ while True:
             out_f.writeframesraw(audio)
             out_f.close()
             audio = bytearray()
+            from_file()
     else:
+        print(data)
         for  char in data: 
             audio.append(char)
