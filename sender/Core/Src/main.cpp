@@ -34,7 +34,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define SAMPLE_RATE 16000
-#define MAX_RECORD_TIME 5
 
 /* USER CODE END PD */
 

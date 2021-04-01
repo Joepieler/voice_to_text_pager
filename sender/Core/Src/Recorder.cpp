@@ -23,29 +23,24 @@ Recorder::~Recorder() {
 
 void Recorder::main(){
 	uint32_t timer_val = __HAL_TIM_GET_COUNTER(Timer_);
-	//Buffer_ = new uint8_t[SAMPLE_RATE * MAX_RECORD_TIME];
 	uint8_t byts_counter = 0;
-	uint8_t tmp = 0;
 	uint64_t buffer = 0;
 	Counter_ = 0;
 	while(true){
 		//record if user button is pressed
-		if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) != GPIO_PIN_SET && Counter_ < SAMPLE_RATE * MAX_RECORD_TIME){
+		if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) != GPIO_PIN_RESET && Counter_ < SAMPLE_RATE * MAX_RECORD_TIME){
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 			//Record on timer rate 16KHz
 			if (__HAL_TIM_GET_COUNTER(Timer_) - timer_val >= TIMER_INTERVAL){
 				timer_val = __HAL_TIM_GET_COUNTER(Timer_);
 				HAL_ADC_Start(Mic_);
-				tmp = HAL_ADC_GetValue(Mic_);
-				buffer = buffer << 8;
-				buffer = buffer | tmp;
+				buffer = (buffer << 8) | HAL_ADC_GetValue(Mic_);
 				byts_counter++;
 				if(byts_counter  == 8){
 					Flash_.WriteFlash64b(buffer);
 					byts_counter = 0;
 				}
 				Counter_++;
-				//timer_val = __HAL_TIM_GET_COUNTER(Timer_);
 			}
 		} else if(Counter_ > 0) {
 			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);

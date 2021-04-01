@@ -13,4 +13,4 @@
 */Debug
 
 *.wav
-*Settings.h
+sender/Core/Inc/Settings.h
