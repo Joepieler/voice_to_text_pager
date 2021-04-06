@@ -145,8 +145,6 @@ int8_t ESP8266Interface::scan(){
 
 
 int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
-	char ontvangdata[255];
-	uint8_t counter = 0;
 	const char command[] = "AT+CIPSEND=%lu\r\n";
 	uint8_t size = sizeof(command);
 	char response[2] = " ";
@@ -157,11 +155,6 @@ int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
 	// Wait for SEND
 	while(response[0] != '>'){
 			HAL_UART_Receive(ESP8266_, (uint8_t *)response, 1, 1);
-			ontvangdata[counter] = response[0];
-			counter ++;
-			if(counter == 255){
-				break;
-			}
 	}
 
 	// Send Data
@@ -172,6 +165,7 @@ int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
 		response[1] = response[0];
 		HAL_UART_Receive(ESP8266_, (uint8_t *)response, 1, 1);
 	}
+	HAL_UART_Receive(ESP8266_, (uint8_t *)response, 2, 1);
 
 	return 0;
 }
