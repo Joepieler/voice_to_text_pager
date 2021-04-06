@@ -115,16 +115,23 @@ int main(void)
   HAL_TIM_Base_Start(&htim16);
   /* USER CODE END 2 */
 
+
+  //const char command[] = "AT+UART_DEF=460800,8,1,0,0\r\n";
+  //HAL_UART_Transmit(&huart1,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
+
   ESP8266Interface i(&huart1);
   i.Reset();
   i.StartUp(1);
   i.Connect(SSID, PASSWORD);
   i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
+  i.Send(0, "Dikke boktor0", 13);
+  i.Send(0, "Dikke boktor1", 13);
+  i.Send(0, "Dikke boktor2", 13);
 
 
 
-  Recorder r(&htim16, &hadc1, &i);
-  r.main();
+  //Recorder r(&htim16, &hadc1, &i);
+  //r.main();
 
 
   /* Infinite loop */
@@ -321,7 +328,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 230400;
+  huart1.Init.BaudRate = 460800;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;

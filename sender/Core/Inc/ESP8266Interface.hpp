@@ -9,6 +9,7 @@
 #define ESP8266INTERFACE_HPP_
 
 #define BUFFERSIZE 100
+#define CONNECTION_ATTEMPTS 100
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,6 +23,7 @@ private:
 	char buffer_[BUFFERSIZE];
 	UART_HandleTypeDef *ESP8266_;
 	int IsOK(uint8_t length);
+	int IsOK(uint8_t length, uint32_t TimeoutTime);
 public:
 	ESP8266Interface(UART_HandleTypeDef *ESP8266);
 	virtual ~ESP8266Interface();
@@ -33,6 +35,7 @@ public:
 	int ConnectSocket(const char *type, const char *ipaddress, uint16_t poort);
 	int8_t GetRSSI();
 	int IsConnected();
+	int GetIP(uint8_t IPaddress[4]);
 	int8_t scan();
 	int Send(int id, const void *datat, uint32_t amount);
 	int32_t Receive(int id, void *data, uint32_t amount);
