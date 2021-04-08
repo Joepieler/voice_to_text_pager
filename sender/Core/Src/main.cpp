@@ -119,15 +119,16 @@ int main(void)
   //const char command[] = "AT+UART_DEF=460800,8,1,0,0\r\n";
   //HAL_UART_Transmit(&huart1,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
 
+  char command[] = "IP:\"%s\"";
+  char buffer[20];
+
   ESP8266Interface i(&huart1);
   i.Reset();
   i.StartUp(1);
   i.Connect(SSID, PASSWORD);
   i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
-  i.Send(0, "Dikke boktor0", 13);
-  i.Send(0, "Dikke boktor1", 13);
-  i.Send(0, "Dikke boktor2", 13);
-
+  sprintf(buffer, command, i.GetIP());
+  i.Send(0, buffer, 20);
 
 
   //Recorder r(&htim16, &hadc1, &i);

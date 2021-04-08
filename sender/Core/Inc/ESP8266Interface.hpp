@@ -22,6 +22,7 @@ class ESP8266Interface {
 private:
 	char buffer_[BUFFERSIZE];
 	UART_HandleTypeDef *ESP8266_;
+	char IPaddress_[15];
 	int IsOK(uint8_t length);
 	int IsOK(uint8_t length, uint32_t TimeoutTime);
 public:
@@ -35,10 +36,11 @@ public:
 	int ConnectSocket(const char *type, const char *ipaddress, uint16_t poort);
 	int8_t GetRSSI();
 	int IsConnected();
-	int GetIP(uint8_t IPaddress[4]);
+	const char * GetIP();
 	int8_t scan();
 	int Send(int id, const void *datat, uint32_t amount);
 	int32_t Receive(int id, void *data, uint32_t amount);
+	bool OpenPort(const char *type, uint32_t port);
 
 };
 

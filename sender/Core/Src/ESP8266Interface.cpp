@@ -134,8 +134,38 @@ int ESP8266Interface::IsConnected(){
 	return 0;
 }
 
-int ESP8266Interface::GetIP(uint8_t IPaddress[4]){
-	return 0;
+const char *ESP8266Interface::GetIP(void){
+	char command[] = "AT+CIFSR\r\n";
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
+
+	char response[1] = "";
+
+	//wait for repeat
+	while(response[0] != '\n'){
+			HAL_UART_Receive(ESP8266_, (uint8_t *)response, 1, 1);
+	}
+
+	//get the ip
+	while(response[0] != '\"'){
+			HAL_UART_Receive(ESP8266_, (uint8_t *)response, 1, 1);
+	}
+	response[0] = ' ';
+
+	uint8_t counter = 0;
+
+	while(response[0] != '\"'){
+			HAL_UART_Receive(ESP8266_, (uint8_t *)response, 1, 1);
+			if(counter < sizeof(IPaddress_)){
+				IPaddress_[counter] = response[0];
+				counter++;
+			}
+	}
+
+	//wait for done
+	while(HAL_TIMEOUT != HAL_UART_Receive(ESP8266_, (uint8_t *)response, 1, 1)){
+	}
+
+	return IPaddress_;
 }
 
 
@@ -172,5 +202,14 @@ int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
 
 
 int32_t ESP8266Interface::Receive(int id, void *data, uint32_t amount){
+	return 0;
+}
+
+
+bool ESP8266Interface::OpenPort(const char *type, uint32_t port){
+
+	const char command[] = "AT+CIPSERVER=1,%lu\r\n";
+	sprintf(buffer_, command, port);
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, sizeof(command), HAL_MAX_DELAY);
 	return 0;
 }
