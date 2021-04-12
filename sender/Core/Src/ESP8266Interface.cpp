@@ -124,6 +124,17 @@ int ESP8266Interface::ConnectSocket(const char *type, const char *ipaddress, uin
 	return 0;
 }
 
+int ESP8266Interface::DisconnectSocket(){
+	char command[] = "AT+CIPCLOSE\r\n";
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
+	char response[13];
+
+	while(strstr(response, "OK") == NULL){
+			HAL_UART_Receive(ESP8266_, (uint8_t *)response, 13, 1);
+		}
+	return 0;
+}
+
 
 int8_t ESP8266Interface::GetRSSI(){
 	return 0;
@@ -201,15 +212,61 @@ int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
 }
 
 
-int32_t ESP8266Interface::Receive(int id, void *data, uint32_t amount){
-	return 0;
+int32_t ESP8266Interface::Receive(int id, void *data, uint32_t & amount){
+	if(HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1) == HAL_TIMEOUT){
+		return HAL_TIMEOUT;
+	}
+	else {
+		char response[6] = " ";
+		HAL_UART_Receive(ESP8266_, (uint8_t *)response, 5, 1);
+		if(strstr(response, "IPD") != NULL){
+
+			while(buffer_[0] != ','){
+				HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1);
+			}
+			buffer_[0] = ' ';
+			while(buffer_[0] != ','){
+				HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1);
+			}
+			//now comes the size of the data
+			uint8_t i = 0;
+			char value[4] = "   ";
+			while(buffer_[0] != ':'){
+				HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1);
+				value[i]= buffer_[0];
+				i++;
+			}
+			sscanf(value,"%lu", &amount);
+
+			//get the data
+			HAL_UART_Receive(ESP8266_, (uint8_t *)data, amount, 1);
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 
 bool ESP8266Interface::OpenPort(const char *type, uint32_t port){
+	char mode[] = "AT+CIPMUX=1\r\n";
+	char response[15] = "";
+	HAL_UART_Transmit(ESP8266_,  (uint8_t *)mode, sizeof(mode), HAL_MAX_DELAY);
+
+	// Wait for OK
+	while(strstr(response, "OK") == NULL){
+		HAL_UART_Receive(ESP8266_, (uint8_t *)response, 5, 1);
+	}
+
 
 	const char command[] = "AT+CIPSERVER=1,%lu\r\n";
 	sprintf(buffer_, command, port);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, sizeof(command), HAL_MAX_DELAY);
+
+	// Wait for OK
+	char response1[5] = "";
+	while(strstr(response1, "OK") == NULL){
+		HAL_UART_Receive(ESP8266_, (uint8_t *)response1, 5, 1);
+	}
 	return 0;
 }

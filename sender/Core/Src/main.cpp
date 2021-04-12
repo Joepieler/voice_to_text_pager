@@ -129,18 +129,22 @@ int main(void)
   i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
   sprintf(buffer, command, i.GetIP());
   i.Send(0, buffer, 20);
+  i.DisconnectSocket();
+  i.OpenPort("UDP", 5005);
 
 
   //Recorder r(&htim16, &hadc1, &i);
   //r.main();
 
-
+  char data[12];
+  uint32_t size;
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
+	  i.Receive(0, data, size);
 
   /* USER CODE END 3 */
   }
