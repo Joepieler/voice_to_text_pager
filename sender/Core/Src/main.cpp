@@ -115,36 +115,61 @@ int main(void)
   HAL_TIM_Base_Start(&htim16);
   /* USER CODE END 2 */
 
+// receiver
+#ifdef RECEIVER
+    ESP8266Interface i(&huart1);
+    i.Reset();
+    i.StartUp(1);
+    i.Connect(SSID, PASSWORD);
+    i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
 
-  //const char command[] = "AT+UART_DEF=460800,8,1,0,0\r\n";
-  //HAL_UART_Transmit(&huart1,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
+    char command[] = "IP:\"%s\"";
+    char buffer[20];
+    sprintf(buffer, command, i.GetIP());
 
-  char command[] = "IP:\"%s\"";
-  char buffer[20];
+    i.Send(0, buffer, 20);
+    i.DisconnectSocket();
 
+    i.OpenPort("UDP", 5005);
+
+
+    char data[500];
+    uint32_t size = 0;
+
+    while(1){
+    	i.Receive(0, data, size);
+    	if(size > 0){
+    		size = 0;
+    	}
+    }
+
+#endif //RECEIVER
+
+#ifdef SENDER
   ESP8266Interface i(&huart1);
   i.Reset();
   i.StartUp(1);
   i.Connect(SSID, PASSWORD);
   i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
-  sprintf(buffer, command, i.GetIP());
-  i.Send(0, buffer, 20);
-  i.DisconnectSocket();
-  i.OpenPort("UDP", 5005);
+
+  //start main code
+  Recorder r(&htim16, &hadc1, &i);
+  r.main();
+
+#endif //SENDER
 
 
-  //Recorder r(&htim16, &hadc1, &i);
-  //r.main();
+#ifdef SETBAUTRATE
+  const char command[] = "AT+UART_DEF=460800,8,1,0,0\r\n";
+  HAL_UART_Transmit(&huart1,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
+#endif // SETBAUTRATE
 
-  char data[12];
-  uint32_t size;
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
-	  i.Receive(0, data, size);
 
   /* USER CODE END 3 */
   }
