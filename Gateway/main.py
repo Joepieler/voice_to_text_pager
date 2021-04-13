@@ -1,4 +1,6 @@
-from datetime import datetime
+import time
+import threading
+import queue
 import socket
 import wave
 import azure.cognitiveservices.speech as speechsdk
@@ -7,14 +9,9 @@ import azure.cognitiveservices.speech as speechsdk
 UDP_IP = "192.168.178.119"
 UDP_PORT = 5005
 
+q = queue.Queue()
+
 RECEIVE_LIST = []
-
-sock = socket.socket()
-
-sock = socket.socket(socket.AF_INET, # Internet
-                    socket.SOCK_DGRAM) # UDP
-sock.bind((UDP_IP, UDP_PORT))
-
 
 def from_file():
     speech_config = speechsdk.SpeechConfig(subscription="7181a5a04645430b849d07f155314e4d", region="westeurope", )
@@ -27,49 +24,75 @@ def from_file():
     return result.text
 
 
-def send_data_to_receivers(list_receive_devices, MESSAGE):
+def MakeAudioFile(audio: bytearray):
+    with wave.open("sound.wav", "wb") as out_f:
+        out_f.setnchannels(1)
+        out_f.setsampwidth(1) # number of bytes for 8 bit it is 1
+        out_f.setframerate(16000)
+        out_f.writeframesraw(audio)
+        out_f.close()
+
+
+def AddIP(IPmessage):
+    IPaddress = ""
+    for char in IPmessage:
+        if char in b'0123456789.':
+            IPaddress += chr(char)
+    
+    if IPaddress not in RECEIVE_LIST:
+        RECEIVE_LIST.append(IPaddress)
+    print(RECEIVE_LIST)
+
+
+def send_data_to_receivers(sock, list_receive_devices, MESSAGE):
     for ipaddress in list_receive_devices:
-        sock.sendto(MESSAGE, (ipaddress, UDP_PORT))
+        sock.connect((ipaddress, UDP_PORT))
+        sock.send(str(MESSAGE).encode(),)
+        sock.close()
+        print("send to ",ipaddress)
 
 
-def Main():
+def SendDataThread():
+    sock = socket.socket()
+    while True:
+        while not q.empty():
+            send_data_to_receivers(sock, RECEIVE_LIST, q.get())
+            print("audio send")
+
+
+def ReceiveDataThread():
+    #connect to socket
+    sock = socket.socket()
+
+    sock = socket.socket(socket.AF_INET, # Internet
+                        socket.SOCK_DGRAM) # UDP
+    sock.bind((UDP_IP, UDP_PORT))
+
     audio = bytearray()
 
+    #while loop
     while True:
         data, addr = sock.recvfrom(1024) # buffer size is 1024 bytes
+        print(data)
         if data == b'start':
             audio = bytearray()
-            print("start received")
-            now = datetime.now()
         elif data == b'end':
-            print("Audio received")
-            print("length of audio :", len(audio) / 16000 )
-            with wave.open("sound.wav", "wb") as out_f:
-                out_f.setnchannels(1)
-                out_f.setsampwidth(1) # number of bytes
-                out_f.setframerate(16000)
-                out_f.writeframesraw(audio)
-                out_f.close()
-                audio = bytearray()
-
-                messsage = from_file()
-
-                send_data_to_receivers(RECEIVE_LIST, messsage)
+            MakeAudioFile(audio)
+            audio = bytearray()
+            print("audio received")
+            #add string to queue
+            q.put(from_file())
             
-        elif b'IP' in data:
-            IPaddress = ""
-            for char in data:
-                if char in b'0123456789.':
-                    IPaddress += chr(char)
-            
-            if IPaddress not in RECEIVE_LIST:
-                RECEIVE_LIST.append(IPaddress)
-            print(RECEIVE_LIST)
-                
-        else:
+        elif b'IP' in data and len(data) < 50:
             print(data)
+            AddIP(data)
+            
+        else:
             for  char in data: 
                 audio.append(char)
 
 
-Main()
+R = threading.Thread(target=ReceiveDataThread)
+R.start()
+SendDataThread()
+
