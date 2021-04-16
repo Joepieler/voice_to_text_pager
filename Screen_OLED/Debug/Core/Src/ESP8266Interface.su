@@ -1,0 +1,20 @@
+ESP8266Interface.cpp:10:5:int ESP8266Interface::IsOK(uint8_t)	32	static
+ESP8266Interface.cpp:20:5:int ESP8266Interface::IsOK(uint8_t, uint32_t)	40	dynamic
+ESP8266Interface.cpp:29:6:bool ESP8266Interface::WaitForChar(char, uint32_t)	32	static
+ESP8266Interface.cpp:41:1:ESP8266Interface::ESP8266Interface(UART_HandleTypeDef*)	16	static
+ESP8266Interface.cpp:47:1:ESP8266Interface::~ESP8266Interface()	16	static
+ESP8266Interface.cpp:47:1:virtual ESP8266Interface::~ESP8266Interface()	16	static
+ESP8266Interface.cpp:51:5:int ESP8266Interface::StartUp(int)	48	static
+ESP8266Interface.cpp:63:5:int ESP8266Interface::Reset()	48	static
+ESP8266Interface.cpp:77:5:int ESP8266Interface::DHCP(bool, int)	24	static
+ESP8266Interface.cpp:82:5:int ESP8266Interface::Connect(const char*, const char*)	72	static
+ESP8266Interface.cpp:106:5:int ESP8266Interface::Disconnect()	32	static
+ESP8266Interface.cpp:113:5:int ESP8266Interface::ConnectSocket(const char*, const char*, uint16_t)	104	static
+ESP8266Interface.cpp:138:5:int ESP8266Interface::DisconnectSocket()	56	static
+ESP8266Interface.cpp:150:8:int8_t ESP8266Interface::GetRSSI()	16	static
+ESP8266Interface.cpp:155:5:int ESP8266Interface::IsConnected()	16	static
+ESP8266Interface.cpp:159:13:const char* ESP8266Interface::GetIP()	32	static
+ESP8266Interface.cpp:194:8:int8_t ESP8266Interface::scan()	16	static
+ESP8266Interface.cpp:199:5:int ESP8266Interface::Send(int, const void*, uint32_t)	56	static
+ESP8266Interface.cpp:226:9:int32_t ESP8266Interface::Receive(int, void*, uint32_t&)	40	static
+ESP8266Interface.cpp:271:6:bool ESP8266Interface::OpenPort(const char*, uint32_t)	96	static
