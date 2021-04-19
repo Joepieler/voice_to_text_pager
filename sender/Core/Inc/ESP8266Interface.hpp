@@ -23,8 +23,8 @@ private:
 	char buffer_[BUFFERSIZE];
 	UART_HandleTypeDef *ESP8266_;
 	char IPaddress_[15];
-	int IsOK(uint8_t length);
-	int IsOK(uint8_t length, uint32_t TimeoutTime);
+	bool WaitForString(uint32_t timeout, uint32_t length, const char * string);
+	bool WaitForChar(uint32_t timeout, char value);
 public:
 	ESP8266Interface(UART_HandleTypeDef *ESP8266);
 	virtual ~ESP8266Interface();
