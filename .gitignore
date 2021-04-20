@@ -8,6 +8,8 @@
 *.hex
 *.lst
 *.map
+*.d
+*.su
 
 # debug folder
 */Debug
