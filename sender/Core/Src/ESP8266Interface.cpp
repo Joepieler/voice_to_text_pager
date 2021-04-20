@@ -193,35 +193,43 @@ int32_t ESP8266Interface::Receive(int id, void *data, uint32_t & amount){
 		return HAL_TIMEOUT;
 	}
 	else {
-		char response[6] = " ";
-		HAL_UART_Receive(ESP8266_, (uint8_t *)response, 5, 1);
-		if(strstr(response, "IPD") != NULL){
+		if(WaitForChar(1,'+')){
+			char response[3] = " ";
+			HAL_UART_Receive(ESP8266_, (uint8_t *)response, 3, 1);
+			if(strstr(response, "IPD") != NULL){
 
-			while(buffer_[0] != ','){
-				HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1);
-			}
-			buffer_[0] = ' ';
-			while(buffer_[0] != ','){
-				HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1);
-			}
-			//now comes the size of the data
-			uint8_t i = 0;
-			char value[4] = "   ";
-			while(buffer_[0] != ':'){
-				HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1);
-				value[i]= buffer_[0];
-				i++;
-			}
-			sscanf(value,"%lu", &amount);
+				WaitForChar(1,',');
+				WaitForChar(1,',');
+				//now comes the size of the data
+				uint8_t i = 0;
+				char value[4] = "   ";
 
-			//get the data
-			HAL_UART_Receive(ESP8266_, (uint8_t *)data, amount, 1);
-			return 0;
+				for(uint32_t t = 0; t < 10; t++){
+					HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1);
+					if(buffer_[0] == ':'){
+						break;
+					}
+					value[i]= buffer_[0];
+					if( i == 4 ){
+						break;
+					}
+					i++;
+				}
+				sscanf(value,"%lu", &amount);
+				if (value == 0){
+					WaitForChar(1,'\n');
+					return 0;
+				}
+
+				//get the data
+				HAL_UART_Receive(ESP8266_, (uint8_t *)data, amount, 5);
+				return WaitForChar(5,'\n');
+			}
 		}
 	}
-
-	return 1;
+	return 0;
 }
+
 
 
 bool ESP8266Interface::OpenPort(const char *type, uint32_t port){
