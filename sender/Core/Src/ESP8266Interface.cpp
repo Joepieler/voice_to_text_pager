@@ -9,7 +9,8 @@
 
 bool ESP8266Interface::WaitForString(uint32_t timeout, uint32_t length, const char * string){
 	char response[length] = " ";
-	for(uint32_t i = 0; i < timeout;){
+	uint32_t i = 0;
+	for(i = 0; i < timeout;){
 		if(HAL_UART_Receive(ESP8266_, (uint8_t *)response, length, 1) != HAL_TIMEOUT){
 			if(strstr(response, string) != NULL){
 				return true;
@@ -18,7 +19,9 @@ bool ESP8266Interface::WaitForString(uint32_t timeout, uint32_t length, const ch
 			i++;
 		}
 	}
-	return false;
+	if( i > 0){
+		return false;
+	}
 }
 
 
@@ -77,7 +80,7 @@ int ESP8266Interface::Connect(const char *wifiname, const char *password){
 	//Response
 	WaitForChar(1,'\n'); //Wait for the Repeat of the message
 	if(WaitForString(5000, 16, "CONNECTED") == false) return false; // if not connected return false
-	if(WaitForString(5000, 13, "GOT") == false) return false; // no IP
+	if(WaitForString(5000, 13, "IP") == false) return false; // no IP
 	return WaitForString(2000, 6, "OK"); // Wait for OK
 }
 
@@ -179,9 +182,9 @@ int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)data, amount, HAL_MAX_DELAY);
 
 	//Wait for received message
-	WaitForChar(1,'\"');
-	WaitForChar(1,'\"');
-	return WaitForString(1, 11, "OK");;
+	WaitForChar(1,'\n');
+	WaitForChar(1,'\n');
+	return WaitForString(10, 11, "OK");
 }
 
 
@@ -223,23 +226,18 @@ int32_t ESP8266Interface::Receive(int id, void *data, uint32_t & amount){
 
 bool ESP8266Interface::OpenPort(const char *type, uint32_t port){
 	char mode[] = "AT+CIPMUX=1\r\n";
-	char response[15] = "";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)mode, sizeof(mode), HAL_MAX_DELAY);
+	WaitForChar(1,'\n'); // Wait for repaid command
 
 	// Wait for OK
-	while(strstr(response, "OK") == NULL){
-		HAL_UART_Receive(ESP8266_, (uint8_t *)response, 5, 1);
-	}
-
+	if(WaitForString(1, 6, "OK")==false) return false;
 
 	const char command[] = "AT+CIPSERVER=1,%lu\r\n";
 	sprintf(buffer_, command, port);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, sizeof(command), HAL_MAX_DELAY);
 
+	WaitForChar(1,'\n'); // Wait for repaid command
+
 	// Wait for OK
-	char response1[5] = "";
-	while(strstr(response1, "OK") == NULL){
-		HAL_UART_Receive(ESP8266_, (uint8_t *)response1, 5, 1);
-	}
-	return 0;
+	return WaitForString(1, 6, "OK");
 }

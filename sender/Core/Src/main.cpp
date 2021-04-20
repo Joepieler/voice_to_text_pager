@@ -123,14 +123,14 @@ int main(void)
   while(i.StartUp(1) == false)HAL_Delay(100);
   while(i.Connect(SSID, PASSWORD) == false)HAL_Delay(100);
   while(i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT) == false)HAL_Delay(100);
-//  sprintf(buffer, command, i.GetIP());
-//  i.Send(0, buffer, 20);
-//  while(i.DisconnectSocket() == false)HAL_Delay(100);
-//  while(i.OpenPort("UDP", 5005) == false)HAL_Delay(100);
+  sprintf(buffer, command, i.GetIP());
+  i.Send(0, buffer, 20);
+  while(i.DisconnectSocket() == false)HAL_Delay(100);
+  while(i.OpenPort("UDP", 5005) == false)HAL_Delay(100);
 
 
-  Recorder r(&htim16, &hadc1, &i);
-  r.main();
+//  Recorder r(&htim16, &hadc1, &i);
+//  r.main();
 
   char data[12];
   uint32_t size;
