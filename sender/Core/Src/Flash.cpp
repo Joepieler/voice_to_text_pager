@@ -9,16 +9,11 @@
 
 #include <math.h>
 
-#define BANK2_BEGIN_ADDRESS 0x0808000
-#define BANK2_END_ADDRESS 0x0808FFFF
-#define BANK2_BEGIN_PAGE 256
-#define BANK2_END_PAGE 511
-
 uint32_t GetPage(uint32_t address)
 {
 	//check if address is in range
 	if(address >= BANK2_BEGIN_ADDRESS && address <= BANK2_END_ADDRESS){
-		return floor((address - BANK2_BEGIN_ADDRESS) / FLASH_PAGE_SIZE) + BANK2_BEGIN_PAGE;
+		return floor((address - BANK2_BEGIN_ADDRESS) / FLASH_PAGE_SIZE) ;//+ BANK2_BEGIN_PAGE;
 
 	}
 	return -1;
@@ -26,7 +21,14 @@ uint32_t GetPage(uint32_t address)
 
 Flash::Flash(uint32_t beginaddress):
 begin_address_(beginaddress)
-{}
+{
+	ClearFlash(16000 * 30);
+}
+Flash::Flash():
+begin_address_(BANK2_BEGIN_ADDRESS)
+{
+	ClearFlash(16000 * 30);
+}
 
 Flash::~Flash() {
 	// TODO Auto-generated destructor stub
@@ -38,7 +40,7 @@ uint32_t Flash::WriteFlash64b(uint64_t data){
 	HAL_FLASH_Unlock();
 
 	//set the data on the flash
-	status = HAL_FLASH_Program_IT(FLASH_TYPEPROGRAM_DOUBLEWORD, begin_address_ + size_, data);
+	status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, begin_address_ + size_, data);
 	size_ += 8; //because we write a double word (64bits)
 	//lock flash again
 	HAL_FLASH_Lock();
@@ -46,8 +48,8 @@ uint32_t Flash::WriteFlash64b(uint64_t data){
 	return status;
 }
 
-uint32_t Flash::ReadFlash64b(uint32_t address, uint64_t data){
-	data = *(__IO uint64_t*) address;
+uint32_t Flash::ReadFlash64b(uint32_t address, uint32_t &data){
+	data = *(__IO uint32_t*) address;
 	return HAL_OK;
 }
 
@@ -58,7 +60,7 @@ uint32_t Flash::WriteFlash2kb(uint64_t *data){
 
 	//set the data on the flash
 	for(uint32_t i = 0; i < 8 ;i++){
-		status = HAL_FLASH_Program_IT(FLASH_TYPEPROGRAM_FAST, begin_address_ + size_, (uint64_t)&data[32*i]);
+		status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_FAST, begin_address_ + size_, (uint64_t)&data[32*i]);
 		size_ += 32 * 8; //because we write a 32 times a double word (64bits)
 	}
 	//lock flash again
@@ -77,6 +79,7 @@ uint32_t Flash::ReadFlash2kb(uint32_t address, uint64_t *data){
 }
 
 uint32_t Flash::ClearFlash(){
+	HAL_FLASH_Unlock();
 	static FLASH_EraseInitTypeDef EraseInitStruct;
 	uint32_t PAGEError;
 
@@ -85,8 +88,9 @@ uint32_t Flash::ClearFlash(){
 	uint32_t EndPage = GetPage(EndPageAdress);
 
 	/* Fill EraseInit structure*/
+	EraseInitStruct.Banks		= 2;
 	EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
-	EraseInitStruct.Page = StartPage;
+	EraseInitStruct.Page        = StartPage;
 	EraseInitStruct.NbPages     = EndPage - StartPage +1;
 
 	if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK)
@@ -94,7 +98,32 @@ uint32_t Flash::ClearFlash(){
 	 /*Error occurred while page erase.*/
 	  return HAL_FLASH_GetError ();
 	}
-
+	size_ = 0;
+	HAL_FLASH_Lock();
 	return HAL_OK;
 
+}
+
+uint32_t Flash::ClearFlash(uint32_t size){
+	HAL_FLASH_Unlock();
+	static FLASH_EraseInitTypeDef EraseInitStruct;
+	uint32_t PAGEError;
+
+	uint32_t StartPage = GetPage(begin_address_);
+	uint32_t EndPageAdress = begin_address_ + size;
+	uint32_t EndPage = GetPage(EndPageAdress);
+
+	/* Fill EraseInit structure*/
+	EraseInitStruct.Banks		= FLASH_BANK_2;
+	EraseInitStruct.TypeErase   = FLASH_TYPEERASE_MASSERASE;
+	EraseInitStruct.Page        = StartPage;
+	EraseInitStruct.NbPages     = EndPage - StartPage +1;
+
+	if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK)
+	{
+	 /*Error occurred while page erase.*/
+	  return HAL_FLASH_GetError ();
+	}
+	HAL_FLASH_Lock();
+	return HAL_OK;
 }

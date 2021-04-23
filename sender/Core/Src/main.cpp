@@ -34,7 +34,6 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define SAMPLE_RATE 16000
-#define MAX_RECORD_TIME 5
 
 /* USER CODE END PD */
 
@@ -117,16 +116,13 @@ int main(void)
   /* USER CODE END 2 */
 
   ESP8266Interface i(&huart1);
-  i.Reset();
-  i.StartUp(1);
-  i.Connect(SSID, PASSWORD);
-  i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT);
+  while(i.Reset() == false)HAL_Delay(100);
+  while(i.StartUp(1) == false)HAL_Delay(100);
+  while(i.Connect(SSID, PASSWORD) == false)HAL_Delay(100);
+  while(i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT) == false)HAL_Delay(100);
 
-
-
-  Recorder r(&htim16, &hadc1 ,&hdac1, &i);
+  Recorder r(&htim16, &hadc1, &i);
   r.main();
-
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -322,7 +318,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 230400;
+  huart1.Init.BaudRate = 460800;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;

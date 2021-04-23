@@ -14,6 +14,11 @@ extern "C" {
 
 #include <stdint.h>
 
+#define BANK2_BEGIN_ADDRESS 0x08080000
+#define BANK2_END_ADDRESS 0x080FFFFF
+#define BANK2_BEGIN_PAGE 256
+#define BANK2_END_PAGE 511
+
 
 class Flash {
 private:
@@ -21,12 +26,14 @@ private:
 	uint32_t  size_ = 0;
 public:
 	Flash(uint32_t beginaddress);
+	Flash();
 	virtual ~Flash();
 	uint32_t WriteFlash64b(uint64_t data);
-	uint32_t ReadFlash64b(uint32_t address, uint64_t data);
+	uint32_t ReadFlash64b(uint32_t address, uint32_t &data);
 	uint32_t WriteFlash2kb(uint64_t *data);
 	uint32_t ReadFlash2kb(uint32_t address, uint64_t *data);
 	uint32_t ClearFlash();
+	uint32_t ClearFlash(uint32_t size);
 };
 
 
