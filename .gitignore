@@ -12,7 +12,7 @@
 *.su
 
 # debug folder
-*/Debug
+*/Debug*
 
 *.wav
-sender/Core/Inc/Settings.h
+*Settings.h

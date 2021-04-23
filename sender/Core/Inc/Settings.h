@@ -8,10 +8,10 @@
 #ifndef INC_SETTINGS_H_
 #define INC_SETTINGS_H_
 
-#define SSID "Campagne"
-#define PASSWORD "p8508ab!"
+#define SSID "ssid"
+#define PASSWORD "password"
 #define SOCKET_TYPE "UDP"
-#define SERVER_IP "192.168.178.119"
+#define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 5005
 
 
