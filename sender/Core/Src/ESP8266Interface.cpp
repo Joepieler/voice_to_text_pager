@@ -74,7 +74,7 @@ int ESP8266Interface::DHCP(bool enable, int mode){
 
 int ESP8266Interface::Connect(const char *wifiname, const char *password){
 	char command[] = "AT+CWJAP=\"%s\",\"%s\"\r\n";
-	uint8_t size = sizeof(command) + sizeof(wifiname) + sizeof(password) + 3;
+	uint8_t size = sizeof(command) + strlen(wifiname) + strlen(password) - 5;
 	sprintf(buffer_, command, wifiname, password);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, size, HAL_MAX_DELAY);
 	//Response
@@ -101,7 +101,7 @@ int ESP8266Interface::ConnectSocket(const char *type, const char *ipaddress, uin
 
 	//Send Socket connect data
 	char command[] = "AT+CIPSTART=\"%s\",\"%s\",%d\r\n";
-	uint8_t size = sizeof(command) + sizeof(type) + sizeof(ipaddress) + 8;
+	uint8_t size = sizeof(command) + strlen(type) + strlen(ipaddress) - 3;
 	sprintf(buffer_, command, type, ipaddress, poort);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, size, HAL_MAX_DELAY);
 
