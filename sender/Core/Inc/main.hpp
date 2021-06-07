@@ -35,6 +35,7 @@ extern "C" {
 #include <Flash.hpp>
 #include <Recorder.hpp>
 #include <ESP8266.hpp>
+#include <CommunicationAdaptor.hpp>
 #include <Settings.h>
 
 /* USER CODE END Includes */

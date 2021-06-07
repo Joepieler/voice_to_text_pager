@@ -92,7 +92,7 @@ int ESP8266::Disconnect(){
 }
 
 
-int ESP8266::ConnectSocket(const char *type, const char *ipaddress, uint16_t poort){
+int ESP8266::ConnectSocket(const char *type, const char *ipaddress, uint16_t port){
 	char mode[] = "AT+CIPMUX=0\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)mode, sizeof(mode), HAL_MAX_DELAY);
 
@@ -102,7 +102,7 @@ int ESP8266::ConnectSocket(const char *type, const char *ipaddress, uint16_t poo
 	//Send Socket connect data
 	char command[] = "AT+CIPSTART=\"%s\",\"%s\",%d\r\n";
 	uint8_t size = sizeof(command) + strlen(type) + strlen(ipaddress) - 3;
-	sprintf(buffer_, command, type, ipaddress, poort);
+	sprintf(buffer_, command, type, ipaddress, port);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, size, HAL_MAX_DELAY);
 
 	WaitForChar(1,'\n'); //Wait for the Repeat of the message

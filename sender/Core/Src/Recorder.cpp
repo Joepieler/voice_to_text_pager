@@ -11,11 +11,11 @@
 #define MESSAGESIZE 96
 #define TIMER_INTERVAL 160000 / SAMPLE_RATE
 
-Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, ESP8266 *ESP){
+Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, SendTarget *sender){
 	// TODO Auto-generated constructor stub
 	Timer_ = timer;
 	Mic_ = mic;
-	ESP_ = ESP;
+	Sender_ = sender;
 }
 
 Recorder::~Recorder() {
@@ -51,7 +51,7 @@ void Recorder::main(){
 			HAL_GPIO_WritePin(LR_GPIO_Port, LR_Pin, GPIO_PIN_SET);
 	 		uint64_t i = 0;
 	 		buffer = 0 ;
-	 		ESP_->Send(0, "start", 5);
+	 		Sender_->SendData("start", 5);
 			while(i < Counter_){
 				if(Counter_ - i >= MESSAGESIZE){
 					uint8_t b[MESSAGESIZE];
@@ -69,13 +69,13 @@ void Recorder::main(){
 						b[x + 6] = buffer2_B >> 8;
 						b[x + 7] = buffer2_B;
 					}
-					ESP_->Send(0, b, MESSAGESIZE);
+					Sender_->SendData(b, MESSAGESIZE);
 					i +=MESSAGESIZE;
 				}
 				else
 				{
 					Counter_ = 0;
-					ESP_->Send(0, "end", 3);
+					Sender_->SendData("end", 3);
 					Flash_.ClearFlash();
 					HAL_GPIO_WritePin(LR_GPIO_Port, LR_Pin, GPIO_PIN_RESET);
 					HAL_GPIO_WritePin(LG_GPIO_Port, LG_Pin, GPIO_PIN_SET);

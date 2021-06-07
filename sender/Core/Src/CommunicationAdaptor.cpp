@@ -7,12 +7,14 @@
 
 #include "CommunicationAdaptor.hpp"
 
-CommunicationAdaptor::CommunicationAdaptor() {
-	// TODO Auto-generated constructor stub
-
+CommunicationAdaptor::CommunicationAdaptor(ESP8266 *ESP) {
+	ESP_ = ESP;
 }
 
 CommunicationAdaptor::~CommunicationAdaptor() {
 	// TODO Auto-generated destructor stub
 }
 
+void CommunicationAdaptor::SendData(const void *data, uint32_t amount){
+	ESP_->Send(0, data, amount);
+}

@@ -117,14 +117,18 @@ int main(void)
   HAL_GPIO_WritePin(LR_GPIO_Port, LR_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
-  ESP8266 i(&huart1);
-  while(i.Reset() == false)HAL_Delay(100);
-  while(i.StartUp(1) == false)HAL_Delay(100);
-  while(i.Connect(SSID, PASSWORD) == false)HAL_Delay(100);
-  while(i.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT) == false)HAL_Delay(100);
+  ESP8266 ESP(&huart1);
+  CommunicationAdaptor Adaptor(&ESP);
+  Recorder REC(&htim16, &hadc1, &Adaptor);
 
-  Recorder r(&htim16, &hadc1, &i);
-  r.main();
+  //startup
+  while(ESP.Reset() == false)HAL_Delay(100);
+  while(ESP.StartUp(1) == false)HAL_Delay(100);
+  while(ESP.Connect(SSID, PASSWORD) == false)HAL_Delay(100);
+  while(ESP.ConnectSocket(SOCKET_TYPE, SERVER_IP, SERVER_PORT) == false)HAL_Delay(100);
+
+
+  REC.main();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
