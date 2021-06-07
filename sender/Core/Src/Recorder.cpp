@@ -11,7 +11,7 @@
 #define MESSAGESIZE 96
 #define TIMER_INTERVAL 160000 / SAMPLE_RATE
 
-Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, ESP8266Interface *ESP){
+Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, ESP8266 *ESP){
 	// TODO Auto-generated constructor stub
 	Timer_ = timer;
 	Mic_ = mic;

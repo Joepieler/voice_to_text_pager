@@ -1,12 +1,12 @@
 /*
- * ESP8266Interface.hpp
+ * ESP8266.hpp
  *
  *  Created on: Mar 23, 2021
  *      Author: BCAMPAGN
  */
 
-#ifndef ESP8266INTERFACE_HPP_
-#define ESP8266INTERFACE_HPP_
+#ifndef ESP8266_HPP_
+#define ESP8266_HPP_
 
 #define BUFFERSIZE 100
 #define CONNECTION_ATTEMPTS 100
@@ -18,7 +18,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
-class ESP8266Interface {
+class ESP8266 {
 private:
 	char buffer_[BUFFERSIZE];
 	UART_HandleTypeDef *ESP8266_;
@@ -26,8 +26,8 @@ private:
 	bool WaitForString(uint32_t timeout, uint32_t length, const char * string);
 	bool WaitForChar(uint32_t timeout, char value);
 public:
-	ESP8266Interface(UART_HandleTypeDef *ESP8266);
-	virtual ~ESP8266Interface();
+	ESP8266(UART_HandleTypeDef *ESP8266);
+	virtual ~ESP8266();
 	int StartUp(int mode);
 	int Reset();
 	int DHCP(bool enable, int mode);
@@ -47,4 +47,4 @@ public:
 
 }
 #endif
-#endif /* ESP8266INTERFACE_HPP_ */
+#endif /* ESP8266_HPP_ */

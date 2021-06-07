@@ -117,7 +117,7 @@ int main(void)
   HAL_GPIO_WritePin(LR_GPIO_Port, LR_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
-  ESP8266Interface i(&huart1);
+  ESP8266 i(&huart1);
   while(i.Reset() == false)HAL_Delay(100);
   while(i.StartUp(1) == false)HAL_Delay(100);
   while(i.Connect(SSID, PASSWORD) == false)HAL_Delay(100);

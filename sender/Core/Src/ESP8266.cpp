@@ -1,13 +1,13 @@
 /*
- * ESP8266Interface.cpp
+ * ESP8266.cpp
  *
  *  Created on: Mar 23, 2021
  *      Author: BCAMPAGN
  */
 
-#include "ESP8266Interface.hpp"
+#include "ESP8266.hpp"
 
-bool ESP8266Interface::WaitForString(uint32_t timeout, uint32_t length, const char * string){
+bool ESP8266::WaitForString(uint32_t timeout, uint32_t length, const char * string){
 	char response[length] = " ";
 	uint32_t i = 0;
 	for(i = 0; i < timeout;){
@@ -25,7 +25,7 @@ bool ESP8266Interface::WaitForString(uint32_t timeout, uint32_t length, const ch
 }
 
 
-bool ESP8266Interface::WaitForChar(uint32_t timeout, char value){
+bool ESP8266::WaitForChar(uint32_t timeout, char value){
 	char a = 0;
 	for(uint32_t i = 0; i < timeout;){
 			if(HAL_UART_Receive(ESP8266_, (uint8_t *)&a, 1, 1) == HAL_TIMEOUT) i++;
@@ -37,18 +37,18 @@ bool ESP8266Interface::WaitForChar(uint32_t timeout, char value){
 }
 
 
-ESP8266Interface::ESP8266Interface(UART_HandleTypeDef *ESP8266) {
+ESP8266::ESP8266(UART_HandleTypeDef *ESP8266) {
 	// TODO Auto-generated constructor stub
 	ESP8266_ = ESP8266;
 
 }
 
-ESP8266Interface::~ESP8266Interface() {
+ESP8266::~ESP8266() {
 	// TODO Auto-generated destructor stub
 }
 
 
-int ESP8266Interface::StartUp(int mode){
+int ESP8266::StartUp(int mode){
 	const char command[] = "AT+CWMODE=%d\r\n";
 	sprintf(buffer_, command, mode);
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)buffer_, sizeof(command) -2, HAL_MAX_DELAY);
@@ -58,7 +58,7 @@ int ESP8266Interface::StartUp(int mode){
 }
 
 
-int ESP8266Interface::Reset(){
+int ESP8266::Reset(){
 	const char command[] = "AT+RST\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
 	WaitForChar(1,'\n'); //Wait for the Repeat of the message
@@ -67,12 +67,12 @@ int ESP8266Interface::Reset(){
 }
 
 
-int ESP8266Interface::DHCP(bool enable, int mode){
+int ESP8266::DHCP(bool enable, int mode){
 	return 0;
 }
 
 
-int ESP8266Interface::Connect(const char *wifiname, const char *password){
+int ESP8266::Connect(const char *wifiname, const char *password){
 	char command[] = "AT+CWJAP=\"%s\",\"%s\"\r\n";
 	uint8_t size = sizeof(command) + strlen(wifiname) + strlen(password) - 5;
 	sprintf(buffer_, command, wifiname, password);
@@ -85,14 +85,14 @@ int ESP8266Interface::Connect(const char *wifiname, const char *password){
 }
 
 
-int ESP8266Interface::Disconnect(){
+int ESP8266::Disconnect(){
 	char command[] = "AT+CWQAP\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
 	return WaitForString(5, 6, "OK");
 }
 
 
-int ESP8266Interface::ConnectSocket(const char *type, const char *ipaddress, uint16_t poort){
+int ESP8266::ConnectSocket(const char *type, const char *ipaddress, uint16_t poort){
 	char mode[] = "AT+CIPMUX=0\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)mode, sizeof(mode), HAL_MAX_DELAY);
 
@@ -111,7 +111,7 @@ int ESP8266Interface::ConnectSocket(const char *type, const char *ipaddress, uin
 	return WaitForString(1, 6, "OK");
 }
 
-int ESP8266Interface::DisconnectSocket(){
+int ESP8266::DisconnectSocket(){
 	char command[] = "AT+CIPCLOSE\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
 	WaitForChar(1,'\n');
@@ -120,16 +120,16 @@ int ESP8266Interface::DisconnectSocket(){
 }
 
 
-int8_t ESP8266Interface::GetRSSI(){
+int8_t ESP8266::GetRSSI(){
 	return 0;
 }
 
 
-int ESP8266Interface::IsConnected(){
+int ESP8266::IsConnected(){
 	return 0;
 }
 
-const char *ESP8266Interface::GetIP(void){
+const char *ESP8266::GetIP(void){
 	char command[] = "AT+CIFSR\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)command, sizeof(command), HAL_MAX_DELAY);
 
@@ -160,12 +160,12 @@ const char *ESP8266Interface::GetIP(void){
 }
 
 
-int8_t ESP8266Interface::scan(){
+int8_t ESP8266::scan(){
 	return 0;
 }
 
 
-int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
+int ESP8266::Send(int id, const void *data, uint32_t amount){
 	const char command[] = "AT+CIPSEND=%lu\r\n";
 	uint8_t size = sizeof(command);
 	char response[2] = " ";
@@ -188,7 +188,7 @@ int ESP8266Interface::Send(int id, const void *data, uint32_t amount){
 }
 
 
-int32_t ESP8266Interface::Receive(int id, void *data, uint32_t & amount){
+int32_t ESP8266::Receive(int id, void *data, uint32_t & amount){
 	if(HAL_UART_Receive(ESP8266_, (uint8_t *)buffer_, 1, 1) == HAL_TIMEOUT){
 		return HAL_TIMEOUT;
 	}
@@ -232,7 +232,7 @@ int32_t ESP8266Interface::Receive(int id, void *data, uint32_t & amount){
 
 
 
-bool ESP8266Interface::OpenPort(const char *type, uint32_t port){
+bool ESP8266::OpenPort(const char *type, uint32_t port){
 	char mode[] = "AT+CIPMUX=1\r\n";
 	HAL_UART_Transmit(ESP8266_,  (uint8_t *)mode, sizeof(mode), HAL_MAX_DELAY);
 	WaitForChar(1,'\n'); // Wait for repaid command
