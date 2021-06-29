@@ -6,15 +6,16 @@
  */
 
 #include <Recorder.hpp>
+#include <main.hpp>
 
 #define MESSAGESIZE 96
 #define TIMER_INTERVAL 160000 / SAMPLE_RATE
 
-Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, ESP8266Interface *ESP){
+Recorder::Recorder(TIM_HandleTypeDef *timer, ADC_HandleTypeDef *mic, SendTarget *sender){
 	// TODO Auto-generated constructor stub
 	Timer_ = timer;
 	Mic_ = mic;
-	ESP_ = ESP;
+	Sender_ = sender;
 }
 
 Recorder::~Recorder() {
@@ -26,10 +27,13 @@ void Recorder::main(){
 	uint8_t byts_counter = 0;
 	uint64_t buffer = 0;
 	Counter_ = 0;
+	HAL_GPIO_WritePin(LR_GPIO_Port, LR_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LG_GPIO_Port, LG_Pin, GPIO_PIN_SET);
 	while(true){
 		//record if user button is pressed
 		if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_8) != GPIO_PIN_RESET && Counter_ < SAMPLE_RATE * MAX_RECORD_TIME){
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(LG_GPIO_Port, LG_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(LB_GPIO_Port, LB_Pin, GPIO_PIN_SET);
 			//Record on timer rate 16KHz
 			if (__HAL_TIM_GET_COUNTER(Timer_) - timer_val >= TIMER_INTERVAL){
 				timer_val = __HAL_TIM_GET_COUNTER(Timer_);
@@ -43,10 +47,11 @@ void Recorder::main(){
 				Counter_++;
 			}
 		} else if(Counter_ > 0) {
-			HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(LB_GPIO_Port, LB_Pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(LR_GPIO_Port, LR_Pin, GPIO_PIN_SET);
 	 		uint64_t i = 0;
 	 		buffer = 0 ;
-	 		ESP_->Send(0, "start", 5);
+	 		Sender_->SendData("start", 5);
 			while(i < Counter_){
 				if(Counter_ - i >= MESSAGESIZE){
 					uint8_t b[MESSAGESIZE];
@@ -64,14 +69,16 @@ void Recorder::main(){
 						b[x + 6] = buffer2_B >> 8;
 						b[x + 7] = buffer2_B;
 					}
-					ESP_->Send(0, b, MESSAGESIZE);
+					Sender_->SendData(b, MESSAGESIZE);
 					i +=MESSAGESIZE;
 				}
 				else
 				{
 					Counter_ = 0;
-					ESP_->Send(0, "end", 3);
+					Sender_->SendData("end", 3);
 					Flash_.ClearFlash();
+					HAL_GPIO_WritePin(LR_GPIO_Port, LR_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(LG_GPIO_Port, LG_Pin, GPIO_PIN_SET);
 				}
 			}
 			Counter_ = 0;
