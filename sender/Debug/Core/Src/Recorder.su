@@ -1,4 +1,0 @@
-Recorder.cpp:10:1:Recorder::Recorder(TIM_HandleTypeDef*, ADC_HandleTypeDef*, DAC_HandleTypeDef*)	24	static
-Recorder.cpp:17:1:Recorder::~Recorder()	16	static
-Recorder.cpp:17:1:virtual Recorder::~Recorder()	16	static
-Recorder.cpp:21:6:void Recorder::main()	40	static

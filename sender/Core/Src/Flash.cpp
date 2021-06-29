@@ -24,15 +24,19 @@ begin_address_(beginaddress)
 {
 	ClearFlash(16000 * 30);
 }
+
+
 Flash::Flash():
 begin_address_(BANK2_BEGIN_ADDRESS)
 {
 	ClearFlash(16000 * 30);
 }
 
+
 Flash::~Flash() {
-	// TODO Auto-generated destructor stub
+	ClearFlash();
 }
+
 
 uint32_t Flash::WriteFlash64b(uint64_t data){
 	uint32_t status;
@@ -48,10 +52,12 @@ uint32_t Flash::WriteFlash64b(uint64_t data){
 	return status;
 }
 
+
 uint32_t Flash::ReadFlash64b(uint32_t address, uint32_t &data){
 	data = *(__IO uint32_t*) address;
 	return HAL_OK;
 }
+
 
 uint32_t Flash::WriteFlash2kb(uint64_t *data){
 	uint32_t status;
@@ -70,6 +76,7 @@ uint32_t Flash::WriteFlash2kb(uint64_t *data){
 
 }
 
+
 uint32_t Flash::ReadFlash2kb(uint32_t address, uint64_t *data){
 	data = new uint64_t[256];
 	for(uint32_t i = 0; i < 256; i++){
@@ -77,6 +84,7 @@ uint32_t Flash::ReadFlash2kb(uint32_t address, uint64_t *data){
 	}
 	return HAL_OK;
 }
+
 
 uint32_t Flash::ClearFlash(){
 	HAL_FLASH_Unlock();
@@ -87,7 +95,7 @@ uint32_t Flash::ClearFlash(){
 	uint32_t EndPageAdress = begin_address_ + size_;
 	uint32_t EndPage = GetPage(EndPageAdress);
 
-	/* Fill EraseInit structure*/
+	// Fill EraseInit structure
 	EraseInitStruct.Banks		= 2;
 	EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGES;
 	EraseInitStruct.Page        = StartPage;
@@ -95,7 +103,7 @@ uint32_t Flash::ClearFlash(){
 
 	if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK)
 	{
-	 /*Error occurred while page erase.*/
+	 //Error occurred while page erase.
 	  return HAL_FLASH_GetError ();
 	}
 	size_ = 0;
@@ -103,6 +111,7 @@ uint32_t Flash::ClearFlash(){
 	return HAL_OK;
 
 }
+
 
 uint32_t Flash::ClearFlash(uint32_t size){
 	HAL_FLASH_Unlock();
@@ -113,7 +122,7 @@ uint32_t Flash::ClearFlash(uint32_t size){
 	uint32_t EndPageAdress = begin_address_ + size;
 	uint32_t EndPage = GetPage(EndPageAdress);
 
-	/* Fill EraseInit structure*/
+	// Fill EraseInit structure
 	EraseInitStruct.Banks		= FLASH_BANK_2;
 	EraseInitStruct.TypeErase   = FLASH_TYPEERASE_MASSERASE;
 	EraseInitStruct.Page        = StartPage;
@@ -121,7 +130,7 @@ uint32_t Flash::ClearFlash(uint32_t size){
 
 	if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK)
 	{
-	 /*Error occurred while page erase.*/
+	 //Error occurred while page erase.
 	  return HAL_FLASH_GetError ();
 	}
 	HAL_FLASH_Lock();
